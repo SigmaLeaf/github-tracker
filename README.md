@@ -1,0 +1,1 @@
+# CryptoInsights Github Scraper
