@@ -7,6 +7,8 @@ octokit
 
 ## Installation
 ```
+mkdir node
+cd node
 npm init
 npm install @octokit/rest
 ```
