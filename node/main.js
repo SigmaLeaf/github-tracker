@@ -1,31 +1,48 @@
 const express 	= require('express');
 const octokit 	= require('@octokit/rest')()
 const fs 		= require('fs');
+const bodyParser= require('body-parser');
 
 const app = express();
 
+// Configure app to use bodyParser() to retreive data from POST
+app.use(bodyParser.urlencoded({ extended: true}));
+app.use(bodyParser.json());
 
-// To get organization summary
-octokit.orgs.get({
-  org: 'ethereum'
-}).then(({data}) => {
-  //console.log(data)
-  console.log(data['id']);
-  console.log(data['blog']);
-  console.log(data['public_repos']);
-})
+// Set Ports
+var port = process.env.PORT || 8080; 
 
+// Initialize Router
+var router = express.Router();
 
-var server = app.listen(8081, function(){
-	var host = server.address().address;
-	var port = server.address().port;
-	console.log("Listening at http://%s:%s", host, port);
-})
+// Organizations to track
+const orgs = ['ethereum'];
 
-// To get all repos for organization
-// octokit.repos.getForOrg({
-//   org: 'ethereum',
-//   type: 'public'
-// }).then(({data}) => {
-//  console.log(data)
-// })
+// MIDDLEWARES
+router.use(function(req, res, next){
+	next();
+});
+
+// ORGANIZATIONS
+// url: '127.0.0.1/api/'
+router.get('/', function(req, res){
+	res.json({orgs: orgs});
+});
+
+// ETHEREUM
+// url: '127.0.0.1/api/ethereum'
+router.route('/' + orgs[0]).get(function(req, res){
+	octokit.orgs.get({
+	  org: orgs[0]
+	}).then(({data}) => {
+		json = {org: orgs[0],
+				blog: data['blog'],
+				public_repos: data['public_repos']}
+		res.json(json);
+	})
+});
+
+app.use('/api', router);
+
+app.listen(port);
+console.log('server @ ' + port);
